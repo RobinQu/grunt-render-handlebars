@@ -32,7 +32,7 @@
     "grunt-contrib-clean": "^0.5.0",
     "grunt-contrib-nodeunit": "^0.3.3",
     "grunt": "~0.4.5",
-    "handlebar-middleware": "~0.0.5"
+    "handlebar-middleware": "~0.0.7"
   },
   "peerDependencies": {
     "grunt": "~0.4.5"
