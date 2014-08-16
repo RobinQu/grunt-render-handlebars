@@ -6,45 +6,41 @@
  * Licensed under the MIT license.
  */
 
-'use strict';
+"use strict";
 
 module.exports = function(grunt) {
-
-  // Please see the Grunt documentation for more information regarding task
-  // creation: http://gruntjs.com/creating-tasks
-
-  grunt.registerMultiTask('render_handlebars', 'Render handlebars into static files', function() {
+  
+  
+  var engine = require("handlebar-middleware").engine,
+      path = require("path"),
+      async = require("async");
+  
+  
+  grunt.registerMultiTask("renderHandlebars", "Render handlebars into static files", function() {
     // Merge task-specific and/or target-specific options with these defaults.
-    var options = this.options({
-      punctuation: '.',
-      separator: ', '
-    });
+    var options = this.options(),
+        render = engine(options);
 
-    // Iterate over all specified file groups.
-    this.files.forEach(function(f) {
-      // Concat specified files.
-      var src = f.src.filter(function(filepath) {
-        // Warn on and remove invalid source files (if nonull was set).
-        if (!grunt.file.exists(filepath)) {
-          grunt.log.warn('Source file "' + filepath + '" not found.');
-          return false;
-        } else {
-          return true;
+    async.eachLimit(this.files, 5, function(f, callback) {
+      console.log(f.src);
+      var name = path.resolve(f.src[0]).replace(path.resolve(f.orig.cwd), "").replace(/\.hbs$/, ""),
+          dest = f.dest.replace(/hbs$/, "html");
+          render(name, function(e, content) {
+        if(e) {
+          grunt.log.error(e);
+          return callback(e);
         }
-      }).map(function(filepath) {
-        // Read file source.
-        return grunt.file.read(filepath);
-      }).join(grunt.util.normalizelf(options.separator));
-
-      // Handle options.
-      src += options.punctuation;
-
-      // Write the destination file.
-      grunt.file.write(f.dest, src);
-
-      // Print a success message.
-      grunt.log.writeln('File "' + f.dest + '" created.');
-    });
+        if(content) {
+          grunt.file.write(dest, content);
+          grunt.log.ok("hbs " + f.src[0] + " is translated to " + name + " and ouput to " + dest);
+          callback();
+        } else {
+          grunt.log.warn("render result of hbs " + f.src + " is invalid");
+          callback(null, false);
+        }
+        
+      });
+    }, this.async());
   });
 
 };
