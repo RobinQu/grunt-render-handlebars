@@ -22,7 +22,6 @@ module.exports = function(grunt) {
         render = engine(options);
 
     async.eachLimit(this.files, 5, function(f, callback) {
-      console.log(f.src);
       var name = path.resolve(f.src[0]).replace(path.resolve(f.orig.cwd), "").replace(/\.hbs$/, ""),
           dest = f.dest.replace(/hbs$/, "html");
           render(name, function(e, content) {
